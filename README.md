@@ -1,18 +1,4 @@
-Tue, Jul 7 at 9:04 PM
 
-i feel like you did not walk me very correctly step by step the right way of this project 
-
-
-Tue, Jul 7 at 10:50 PM
-where di i create the oac from this imsge i have sent
-
-
-Wed, Jul 8 at 8:41 AM
-Everything finally worked i want a documentation i can upload on my github page outlining the steps I used to achieve everything the walkthrough should be thorough. these are some screenshots
-
- does this architecture diagram reflect the project?
-
-Generated image: Simple pass booking architecture diagram
 
 # Simple AWS Three-Tier Pass Booking System
 
