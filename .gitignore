@@ -1,0 +1,15 @@
+app/venv/
+app/.venv/
+app/__pycache__/
+app/instance/
+*.pyc
+
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/terraform.tfvars
+terraform/*.tfstate
+terraform/*.tfstate.*
+terraform/*.tfplan
+
+.DS_Store
+.vscode/

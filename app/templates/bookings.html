@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Stored Bookings | Mivandy{% endblock %}
+
+{% block content %}
+<section class="records-section">
+    <div class="records-heading">
+        <div>
+            <span class="section-label">Database records</span>
+            <h1>Stored bookings</h1>
+            <p>
+                These rows are being read from PostgreSQL on Amazon RDS.
+            </p>
+        </div>
+        <a class="primary-link" href="{{ url_for('index') }}">Create a booking</a>
+    </div>
+
+    <div class="learning-warning">
+        <span class="warning-icon">!</span>
+        <div>
+            <strong>Learning environment</strong>
+            <p>
+                This page is intentionally open for demonstration. Use only dummy
+                information until authentication and HTTPS are added.
+            </p>
+        </div>
+    </div>
+
+    {% if bookings %}
+        <div class="records-card">
+            <div class="records-summary">
+                <span>{{ bookings|length }} stored booking{% if bookings|length != 1 %}s{% endif %}</span>
+                <span class="database-pill">RDS PostgreSQL</span>
+            </div>
+
+            <div class="table-shell">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Reference</th>
+                            <th>Customer</th>
+                            <th>Contact</th>
+                            <th>Pass</th>
+                            <th>Travel date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for booking in bookings %}
+                            <tr>
+                                <td>
+                                    <span class="reference-cell">{{ booking.reference }}</span>
+                                </td>
+                                <td>
+                                    <div class="customer-cell">
+                                        <span class="avatar">{{ booking.full_name[0]|upper }}</span>
+                                        <div>
+                                            <strong>{{ booking.full_name }}</strong>
+                                            <small>Customer</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <strong>{{ booking.email }}</strong>
+                                    <small>{{ booking.phone }}</small>
+                                </td>
+                                <td>{{ booking.pass_type }}</td>
+                                <td>{{ booking.travel_date.strftime("%d %b %Y") }}</td>
+                                <td>
+                                    <span class="status-pill">Confirmed</span>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% else %}
+        <div class="empty-records">
+            <div class="empty-icon">◎</div>
+            <h2>No bookings yet</h2>
+            <p>Submit your first booking to see it stored in PostgreSQL.</p>
+            <a class="primary-link" href="{{ url_for('index') }}">Create first booking</a>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}
