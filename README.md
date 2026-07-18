@@ -168,25 +168,6 @@ ALB → EC2 port 5000
 EC2 → RDS port 5432
 
 
-i do not lie how you have edone the read me at all i thought you were going to do a very basic readme with a very simple walkthrough of how to run the project and simply insert the picture that i have attached.
-
-You were right. I replaced the long README with a basic version that only contains:
-
-    A short project explanation
-
-    The exact architecture diagram you attached
-
-    Technologies used
-
-    A simple project structure
-
-    Steps to run locally
-
-    Steps to deploy with Terraform
-
-    Basic testing and cleanup instructions
-
-
 Library
 /README.md
 
