@@ -2,11 +2,15 @@ import os
 import secrets
 from datetime import date, datetime, timezone
 
-from flask import Flask, flash, redirect, render_template, request, url_for
+
+# from flask import Flask, flash, redirect, render_template, request, url_for, jsonify
+from flask import Flask, jsonify, request
+from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import URL
 
 app = Flask(__name__)
+CORS(app)
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "local-development-key")
 
 
@@ -52,18 +56,27 @@ class Booking(db.Model):
 PASS_TYPES = ["Daily Pass", "Weekly Pass", "Monthly Pass"]
 
 
-@app.get("/")
-def index():
-    return render_template("index.html", pass_types=PASS_TYPES)
+# @app.get("/")
+# def index():
+#     return render_template("index.html", pass_types=PASS_TYPES)
+
+@app.get("/api/pass-types")
+def get_pass_types():
+    return jsonify(PASS_TYPES)
 
 
-@app.post("/book")
+@app.post("/api/book")
 def create_booking():
-    full_name = request.form.get("full_name", "").strip()
-    email = request.form.get("email", "").strip().lower()
-    phone = request.form.get("phone", "").strip()
-    pass_type = request.form.get("pass_type", "").strip()
-    travel_date_text = request.form.get("travel_date", "").strip()
+    print(request.headers)
+    print(request.get_data(as_text=True))
+
+    data = request.get_json()
+
+    full_name = data.get("full_name", "").strip()
+    email = data.get("email", "").strip().lower()
+    phone = data.get("phone", "").strip()
+    pass_type = data.get("pass_type", "").strip()
+    travel_date_text = data.get("travel_date", "").strip()
 
     errors = []
 
@@ -88,10 +101,16 @@ def create_booking():
     if travel_date and travel_date < date.today():
         errors.append("The travel date cannot be in the past.")
 
+    # if errors:
+    #     for error in errors:
+    #         flash(error, "error")
+    #     return redirect(url_for("index"))
+    
     if errors:
-        for error in errors:
-            flash(error, "error")
-        return redirect(url_for("index"))
+        return jsonify({
+            "status": "error",
+            "errors": errors
+        }), 400
 
     booking = Booking(
         reference=f"PB-{secrets.token_hex(4).upper()}",
@@ -105,25 +124,76 @@ def create_booking():
     try:
         db.session.add(booking)
         db.session.commit()
+
+    # except Exception:
+        # db.session.rollback()
+        # app.logger.exception("Unable to save booking")
+        # flash("The booking could not be saved. Please try again.", "error")
+        # return redirect(url_for("index"))
+
     except Exception:
         db.session.rollback()
         app.logger.exception("Unable to save booking")
-        flash("The booking could not be saved. Please try again.", "error")
-        return redirect(url_for("index"))
 
-    return redirect(url_for("booking_success", reference=booking.reference))
+        return jsonify({
+            "status": "error",
+            "message": "The booking could not be saved. Please try again."
+        }), 500
+
+    # return redirect(url_for("booking_success", reference=booking.reference))
+
+    return (
+    jsonify({
+        "status": "success",
+        "reference": booking.reference,
+        "message": "Booking created successfully."
+    }),
+    201,
+    )
 
 
-@app.get("/success/<reference>")
-def booking_success(reference):
+# @app.get("/success/<reference>")
+# def booking_success(reference):
+#     booking = Booking.query.filter_by(reference=reference).first_or_404()
+#     return render_template("success.html", booking=booking)
+
+
+@app.get("/api/bookings/<reference>")
+def get_booking(reference):
+
     booking = Booking.query.filter_by(reference=reference).first_or_404()
-    return render_template("success.html", booking=booking)
 
+    return jsonify({
+        "reference": booking.reference,
+        "full_name": booking.full_name,
+        "email": booking.email,
+        "phone": booking.phone,
+        "pass_type": booking.pass_type,
+        "travel_date": booking.travel_date.isoformat()
+    })
 
-@app.get("/bookings")
+# @app.get("/bookings")
+# def list_bookings():
+#     bookings = Booking.query.order_by(Booking.created_at.desc()).all()
+    # return render_template("bookings.html", bookings=bookings)
+
+@app.get("/api/bookings")
 def list_bookings():
+
     bookings = Booking.query.order_by(Booking.created_at.desc()).all()
-    return render_template("bookings.html", bookings=bookings)
+
+    return jsonify([
+        {
+            "reference": b.reference,
+            "full_name": b.full_name,
+            "email": b.email,
+            "phone": b.phone,
+            "pass_type": b.pass_type,
+            "travel_date": b.travel_date.isoformat(),
+            "created_at": b.created_at.isoformat(),
+        }
+        for b in bookings
+    ])
 
 
 @app.get("/health")

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Booking confirmation">
+
+    <title>Booking Confirmed | Mivandy</title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+    <script type="module" src="js/success.js" defer></script>
+</head>
+
+<body>
+
+<div class="page-shell">
+
+    <header class="site-header">
+
+        <a class="brand" href="index.html" aria-label="Mivandy Pass home">
+
+            <span class="brand-mark" aria-hidden="true">
+                <svg viewBox="0 0 48 48" role="img">
+                    <path d="M10 14.5A4.5 4.5 0 0 1 14.5 10h19A4.5 4.5 0 0 1 38 14.5v5.2a5.4 5.4 0 0 0 0 8.6v5.2A4.5 4.5 0 0 1 33.5 38h-19A4.5 4.5 0 0 1 10 33.5v-5.2a5.4 5.4 0 0 0 0-8.6z"/>
+                    <path class="brand-line" d="M24 15v18"/>
+                </svg>
+            </span>
+
+            <span class="brand-copy">
+                <strong>Mivandy</strong>
+                <small>Pass Booking</small>
+            </span>
+
+        </a>
+
+        <nav class="main-nav">
+            <a href="index.html">Book a pass</a>
+            <a href="bookings.html">Stored bookings</a>
+        </nav>
+
+        <div class="header-badge">
+            <span class="status-dot"></span>
+            AWS three-tier app
+        </div>
+
+    </header>
+
+    <main>
+
+        <section class="confirmation-section">
+
+            <div class="confirmation-card">
+
+                <div class="confirmation-icon" aria-hidden="true">
+
+                    <svg viewBox="0 0 64 64">
+                        <circle cx="32" cy="32" r="30"/>
+                        <path d="m19 33 8 8 18-19"/>
+                    </svg>
+
+                </div>
+
+                <span class="section-label">Booking successful</span>
+
+                <h1>Your pass has been booked.</h1>
+
+                <p class="confirmation-copy">
+                    Your booking was processed by the Flask API and saved to
+                    PostgreSQL on Amazon RDS.
+                </p>
+
+                <div class="reference-box">
+
+                    <small>Booking reference</small>
+
+                    <strong id="bookingReference"></strong>
+
+                </div>
+
+                <div class="confirmation-grid">
+
+                    <div>
+
+                        <span>Customer</span>
+
+                        <strong id="customerName"></strong>
+
+                    </div>
+
+                    <div>
+
+                        <span>Pass type</span>
+
+                        <strong id="passType"></strong>
+
+                    </div>
+
+                    <div>
+
+                        <span>Travel date</span>
+
+                        <strong id="travelDate"></strong>
+
+                    </div>
+
+                    <div>
+
+                        <span>Status</span>
+
+                        <strong class="success-text">
+                            Confirmed
+                        </strong>
+
+                    </div>
+
+                </div>
+
+                <div class="confirmation-actions">
+
+                    <a class="submit-button link-button"
+                       href="index.html">
+
+                        Book another pass
+
+                    </a>
+
+                    <a class="secondary-button"
+                       href="bookings.html">
+
+                        View stored bookings
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <footer class="site-footer">
+
+        <div>
+
+            <strong>Mivandy Pass</strong>
+
+            <span>Simple booking. Reliable infrastructure.</span>
+
+        </div>
+
+        <p>HTML + CSS + Flask API + EC2 Auto Scaling + Amazon RDS</p>
+
+    </footer>
+
+</div>
+
+</body>
+</html>

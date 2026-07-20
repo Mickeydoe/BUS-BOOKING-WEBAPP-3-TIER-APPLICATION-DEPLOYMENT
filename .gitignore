@@ -1,7 +1,7 @@
-app/venv/
-app/.venv/
-app/__pycache__/
-app/instance/
+./venv/
+./.venv/
+./__pycache__/
+./instance/
 *.pyc
 
 terraform/.terraform/
