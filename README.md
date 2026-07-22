@@ -1,48 +1,84 @@
 # Simple AWS Three-Tier Pass Booking System
 
-This is a simple three-tier pass booking application that I built to understand how a frontend, backend and database work together on AWS.
+This is a cloud-native three-tier pass booking application deployed on AWS using Terraform.
 
-A customer completes a booking form on the website. The Python Flask application processes the form and stores the booking in an Amazon RDS PostgreSQL database.
+A customer completes a booking form hosted by the frontend application. The request is forwarded to a Flask backend through an internal Application Load Balancer, where it is processed and stored in an Amazon RDS PostgreSQL database. The application is deployed across multiple Availability Zones using Auto Scaling Groups for high availability.
 
 ## Architecture
 
-![Simple AWS Three-Tier Pass Booking Architecture](docs/architecture-diagram.png)
+![Simple AWS Three-Tier Pass Booking Architecture](docs/Simple-Pass-Architecture-Diagram.png)
 
 The request follows this path:
 
 ```text
 User
-  → Application Load Balancer
-  → EC2 instances in an Auto Scaling Group
-  → Amazon RDS PostgreSQL
+  Internet
+    │
+    ▼
+Public Application Load Balancer
+    │
+    ▼
+Frontend Auto Scaling Group (Nginx)
+    │
+    ▼
+Internal Application Load Balancer
+    │
+    ▼
+Backend Auto Scaling Group (Flask + Gunicorn)
+    │
+    ▼
+Amazon RDS PostgreSQL
 ```
 
 ## Technologies used
 
-- **Frontend:** HTML and CSS
-- **Backend:** Python Flask
+- **Frontend:** HTML, CSS, JavaScript, Nginx
+- **Backend:** Python, Flask, Gunicorn
 - **Database:** Amazon RDS PostgreSQL
 - **Infrastructure:** Terraform
-- **AWS services:** VPC, EC2, Application Load Balancer, Auto Scaling and RDS
+- **AWS Services:** VPC, EC2, Application Load Balancer, Auto Scaling Groups, Amazon RDS, Internet Gateway, NAT Gateway and Security Groups
 
 ## Project structure
 
 ```text
 simple-aws-three-tier-booking/
-├── app/
+├── backend/
 │   ├── app.py
 │   ├── requirements.txt
-│   ├── static/
-│   └── templates/
+│   └── ...
+│
+├── frontend/
+│   ├── index.html
+│   ├── bookings.html
+│   ├── success.html
+│   ├── js/
+|   |   ├── api.js
+|   |   ├── bookings.js
+|   |   ├── config.js
+|   |   ├── index.js
+│   |   └── booking.js
+|   |    
+|   |    
+│   ├── css/
+|       ├── style.css
+│       └── style.min.css
+│   
 │
 ├── terraform/
-│   ├── network.tf
-│   ├── security.tf
 │   ├── alb.tf
 │   ├── compute.tf
+│   ├── data.tf
+│   ├── network.tf
+│   ├── outputs.tf
+│   ├── providers.tf
 │   ├── rds.tf
+│   ├── security.tf
 │   ├── variables.tf
-│   └── outputs.tf
+│   ├── versions.tf
+│   ├── terraform.tfvars.example
+│   └── user_data/
+│       ├── backend.sh
+│       └── frontend.sh
 │
 ├── docs/
 │   └── architecture-diagram.png
@@ -55,7 +91,7 @@ simple-aws-three-tier-booking/
 Move into the application folder:
 
 ```bash
-cd app
+cd backend
 ```
 
 Create a Python virtual environment:
@@ -94,7 +130,7 @@ Open the website in your browser:
 http://localhost:5000
 ```
 
-The local version uses SQLite automatically.
+The local version uses SQLite automatically. The frontend automatically communicates with the local Flask backend when running on localhost.
 
 ## Deploy the project to AWS
 
@@ -168,7 +204,7 @@ Open the address in your browser.
 5. Open the bookings page:
 
 ```text
-http://ALB-DNS-NAME/bookings
+http://PUBLIC-ALB-DNS-NAME/bookings.html
 ```
 
 The submitted booking should appear on the page. This confirms that the Flask application successfully stored the data in RDS PostgreSQL.
@@ -204,94 +240,18 @@ This is a learning project. It currently uses HTTP, does not have user authentic
 
 Only dummy customer information should be used.
 
+## Future Improvements
 
-=======================================================================
+The following enhancements could be implemented to make the application more production-ready:
 
-                                      Internet
-                                          │
-                                          │
-                                  ┌─────────────────┐
-                                  │ Internet Gateway│
-                                  └─────────────────┘
-                                          │
-            ───────────────────────── Public Subnet ─────────────────────────
-                                          │
-                                          │
-                            ┌──────────────────────────┐
-                            │  Public ALB (Internet)   │
-                            └──────────────────────────┘
-                                          │
-                        ┌─────────────────┴─────────────────┐
-                        │                                   │
-                        ▼                                   ▼
-              ┌────────────────┐                 ┌────────────────┐
-              │ Frontend EC2 #1 │               │ Frontend EC2 #2 │
-              │  Nginx + Static │               │  Nginx + Static │
-              └────────────────┘               └────────────────┘
-                        ▲                                   ▲
-                        └────────── Frontend ASG ───────────┘
-                                          │
-                                          │
-                                   HTTP /api/*
-                                          │
-                                          ▼
-                         ┌────────────────────────────┐
-                         │ Internal Application ALB   │
-                         └────────────────────────────┘
+- **HTTPS with AWS Certificate Manager (ACM)** to encrypt traffic using SSL/TLS.
+- **Route 53 custom domain** for a user-friendly application URL.
+- **CI/CD pipeline with GitHub Actions** to automate testing and deployments.
+- **Blue/Green deployments** to enable zero-downtime application releases.
+- **Amazon CloudWatch dashboards and alarms** for monitoring application health and infrastructure performance.
+- **Amazon SNS notifications** to send email alerts for infrastructure events, deployment status, or new booking confirmations.
+- **AWS Secrets Manager** to securely store and manage database credentials and application secrets.
+- **AWS WAF (Web Application Firewall)** to protect the application from common web exploits and attacks.
+- **Database migrations with Alembic** for version-controlled schema changes.
+- **Containerization with Docker and deployment to Amazon ECS** for improved portability and orchestration.
 
-            ─────────────────────── Private App Subnets ─────────────────────
-                                          │
-                        ┌─────────────────┴─────────────────┐
-                        │                                   │
-                        ▼                                   ▼
-              ┌────────────────┐                 ┌────────────────┐
-              │ Backend EC2 #1 │               │ Backend EC2 #2 │
-              │ Flask/Gunicorn │               │ Flask/Gunicorn │
-              └────────────────┘               └────────────────┘
-                        ▲                                   ▲
-                        └────────── Backend ASG ────────────┘
-                                          │
-                                   PostgreSQL (5432)
-                                          │
-                                          ▼
-
-            ─────────────────────── Private DB Subnets ──────────────────────
-
-                              ┌────────────────────────┐
-                              │ Amazon RDS PostgreSQL  │
-                              └────────────────────────┘
-
-
-Outbound Internet Access
-──────────────────────────────────────────────────────────────────────────────
-
-Frontend EC2
-        │
-        ▼
-Internet (public subnet)
-
-Backend EC2
-        │
-        ▼
-┌───────────────┐
-│ NAT Gateway A │────────────┐
-└───────────────┘            │
-                             │
-┌───────────────┐            │
-│ NAT Gateway B │────────────┘
-└───────────────┘
-        │
-        ▼
-Internet Gateway
-
-
-Request flow
-
-User accesses the application via the Public ALB.
-The Public ALB routes requests to the Frontend Auto Scaling Group.
-Nginx serves the static HTML, CSS, and JavaScript.
-JavaScript makes requests such as GET /api/pass-types or POST /api/book.
-Nginx forwards /api/* requests to the Internal ALB.
-The Internal ALB distributes requests across the Backend Auto Scaling Group.
-Flask handles the request and communicates with Amazon RDS PostgreSQL.
-The response flows back through the Internal ALB → Frontend → Public ALB → User.
