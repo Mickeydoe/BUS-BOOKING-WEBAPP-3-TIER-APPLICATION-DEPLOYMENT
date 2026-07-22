@@ -17,7 +17,7 @@ resource "aws_launch_template" "frontend" {
   user_data = base64encode(templatefile("${path.module}/user_data/frontend.sh", {
     repository_url = var.repository_url
     backend_url    = aws_lb.internal.dns_name
-    
+
   }))
 
   monitoring {

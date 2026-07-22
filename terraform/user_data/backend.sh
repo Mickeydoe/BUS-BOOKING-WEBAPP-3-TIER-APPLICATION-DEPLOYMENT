@@ -34,34 +34,34 @@ dnf install -y \
 #--------------------------------------------------
 
 cd /home/ec2-user
-rm -rf "${APP_DIR}"
-git clone "${REPOSITORY_URL}" "${APP_DIR}"
-chown -R ec2-user:ec2-user "${APP_DIR}"
+rm -rf "$${APP_DIR}"
+git clone --branch refactor --single-branch "$${REPOSITORY_URL}" "$${APP_DIR}"
+chown -R ec2-user:ec2-user "$${APP_DIR}"
 
 
 #--------------------------------------------------
 # Python virtual environment
 #--------------------------------------------------
 
-python3 -m venv "${VENV_DIR}"
+python3 -m venv "$${VENV_DIR}"
 
-source "${VENV_DIR}/bin/activate"
+source "$${VENV_DIR}/bin/activate"
 
 pip install --upgrade pip
 
-pip install -r "${APP_DIR}/backend/requirements.txt"
+pip install -r "$${APP_DIR}/backend/requirements.txt"
 
 #--------------------------------------------------
 # Environment variables
 #--------------------------------------------------
 
 cat > /etc/passbooking.env <<EOF
-DB_HOST=${DB_HOST}
-DB_NAME=${DB_NAME}
-DB_USER=${DB_USER}
-DB_PASSWORD=${DB_PASSWORD}
-DB_PORT=${DB_PORT}
-FLASK_SECRET_KEY=$(openssl rand -hex 32)
+DB_HOST=$${DB_HOST}
+DB_NAME=$${DB_NAME}
+DB_USER=$${DB_USER}
+DB_PASSWORD=$${DB_PASSWORD}
+DB_PORT=$${DB_PORT}
+FLASK_SECRET_KEY=$$(openssl rand -hex 32)
 EOF
 
 chmod 600 /etc/passbooking.env
@@ -79,11 +79,11 @@ After=network.target
 User=ec2-user
 Group=ec2-user
 
-WorkingDirectory=${APP_DIR}/backend
+WorkingDirectory=$${APP_DIR}/backend
 
 EnvironmentFile=/etc/passbooking.env
 
-ExecStart=${VENV_DIR}/bin/gunicorn \
+ExecStart=$${VENV_DIR}/bin/gunicorn \
     --workers 2 \
     --bind 0.0.0.0:5000 \
     app:app

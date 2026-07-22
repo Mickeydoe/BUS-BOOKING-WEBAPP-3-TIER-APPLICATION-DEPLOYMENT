@@ -24,11 +24,11 @@ dnf install -y \
 # Clone repository
 #--------------------------------------------------
 
-rm -rf "${APP_DIR}"
+rm -rf "$${APP_DIR}"
 
-git clone "${REPOSITORY_URL}" "${APP_DIR}"
+git clone --branch refactor --single-branch "$${REPOSITORY_URL}" "$${APP_DIR}"
 
-chown -R ec2-user:ec2-user "${APP_DIR}"
+chown -R ec2-user:ec2-user "$${APP_DIR}"
 
 #--------------------------------------------------
 # Copy frontend files
@@ -36,7 +36,7 @@ chown -R ec2-user:ec2-user "${APP_DIR}"
 
 rm -rf /usr/share/nginx/html/*
 
-cp -r "${APP_DIR}/frontend/"* /usr/share/nginx/html/
+cp -r "$${APP_DIR}/frontend/"* /usr/share/nginx/html/
 
 #--------------------------------------------------
 # Configure Nginx
@@ -60,7 +60,7 @@ server {
 
     location /api/ {
 
-        proxy_pass http://${BACKEND_URL};
+        proxy_pass http://$${BACKEND_URL};
 
         proxy_http_version 1.1;
 
