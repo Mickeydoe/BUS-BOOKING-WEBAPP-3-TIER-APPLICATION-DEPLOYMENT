@@ -1,7 +1,8 @@
 variable "aws_region" {
   description = "AWS region in which the project will be created."
   type        = string
-  default     = "us-east-1"
+  # default     = "us-east-1"
+  default = "eu-north-1"
 }
 
 variable "project_name" {
@@ -24,6 +25,11 @@ variable "instance_type" {
   description = "EC2 instance type for the Python application."
   type        = string
   default     = "t3.micro"
+}
+
+variable "key_pair_name" {
+  description = "Name of the EC2 key pair to use for instances"
+  type        = string
 }
 
 variable "asg_min_size" {

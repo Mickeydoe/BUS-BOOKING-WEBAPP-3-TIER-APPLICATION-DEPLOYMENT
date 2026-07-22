@@ -203,3 +203,95 @@ terraform destroy
 This is a learning project. It currently uses HTTP, does not have user authentication and exposes the `/bookings` page.
 
 Only dummy customer information should be used.
+
+
+=======================================================================
+
+                                      Internet
+                                          │
+                                          │
+                                  ┌─────────────────┐
+                                  │ Internet Gateway│
+                                  └─────────────────┘
+                                          │
+            ───────────────────────── Public Subnet ─────────────────────────
+                                          │
+                                          │
+                            ┌──────────────────────────┐
+                            │  Public ALB (Internet)   │
+                            └──────────────────────────┘
+                                          │
+                        ┌─────────────────┴─────────────────┐
+                        │                                   │
+                        ▼                                   ▼
+              ┌────────────────┐                 ┌────────────────┐
+              │ Frontend EC2 #1 │               │ Frontend EC2 #2 │
+              │  Nginx + Static │               │  Nginx + Static │
+              └────────────────┘               └────────────────┘
+                        ▲                                   ▲
+                        └────────── Frontend ASG ───────────┘
+                                          │
+                                          │
+                                   HTTP /api/*
+                                          │
+                                          ▼
+                         ┌────────────────────────────┐
+                         │ Internal Application ALB   │
+                         └────────────────────────────┘
+
+            ─────────────────────── Private App Subnets ─────────────────────
+                                          │
+                        ┌─────────────────┴─────────────────┐
+                        │                                   │
+                        ▼                                   ▼
+              ┌────────────────┐                 ┌────────────────┐
+              │ Backend EC2 #1 │               │ Backend EC2 #2 │
+              │ Flask/Gunicorn │               │ Flask/Gunicorn │
+              └────────────────┘               └────────────────┘
+                        ▲                                   ▲
+                        └────────── Backend ASG ────────────┘
+                                          │
+                                   PostgreSQL (5432)
+                                          │
+                                          ▼
+
+            ─────────────────────── Private DB Subnets ──────────────────────
+
+                              ┌────────────────────────┐
+                              │ Amazon RDS PostgreSQL  │
+                              └────────────────────────┘
+
+
+Outbound Internet Access
+──────────────────────────────────────────────────────────────────────────────
+
+Frontend EC2
+        │
+        ▼
+Internet (public subnet)
+
+Backend EC2
+        │
+        ▼
+┌───────────────┐
+│ NAT Gateway A │────────────┐
+└───────────────┘            │
+                             │
+┌───────────────┐            │
+│ NAT Gateway B │────────────┘
+└───────────────┘
+        │
+        ▼
+Internet Gateway
+
+
+Request flow
+
+User accesses the application via the Public ALB.
+The Public ALB routes requests to the Frontend Auto Scaling Group.
+Nginx serves the static HTML, CSS, and JavaScript.
+JavaScript makes requests such as GET /api/pass-types or POST /api/book.
+Nginx forwards /api/* requests to the Internal ALB.
+The Internal ALB distributes requests across the Backend Auto Scaling Group.
+Flask handles the request and communicates with Amazon RDS PostgreSQL.
+The response flows back through the Internal ALB → Frontend → Public ALB → User.
